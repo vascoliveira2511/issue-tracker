@@ -4,7 +4,7 @@ import ErrorMessage from "@/app/components/ErrorMessage";
 import { issueSchema } from "@/app/validationSchemas";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Issue } from "@prisma/client";
-import { Button, Callout, Spinner, TextField } from "@radix-ui/themes";
+import { Button, Callout, Select, Spinner, TextField } from "@radix-ui/themes";
 import axios from "axios";
 import "easymde/dist/easymde.min.css";
 import dynamic from "next/dynamic";
@@ -28,6 +28,11 @@ const IssueForm = ({ issue }: { issue?: Issue }) => {
     formState: { errors },
   } = useForm<IssueFormData>({
     resolver: zodResolver(issueSchema),
+    defaultValues: {
+      title: issue?.title || "",
+      description: issue?.description || "",
+      status: issue?.status || "OPEN",
+    },
   });
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -52,21 +57,44 @@ const IssueForm = ({ issue }: { issue?: Issue }) => {
         </Callout.Root>
       )}
       <form className="space-y-3" onSubmit={onSubmit}>
-        <TextField.Root
-          defaultValue={issue?.title}
-          placeholder="Title"
-          {...register("title")}
-        ></TextField.Root>
-        <ErrorMessage>{errors.title?.message}</ErrorMessage>
-        <Controller
-          name="description"
-          control={control}
-          defaultValue={issue?.description}
-          render={({ field }) => (
-            <SimpleMDE placeholder="Description" {...field} />
-          )}
-        />
-        <ErrorMessage>{errors.description?.message}</ErrorMessage>
+        <div>
+          <TextField.Root
+            placeholder="Title"
+            {...register("title")}
+          ></TextField.Root>
+          <ErrorMessage>{errors.title?.message}</ErrorMessage>
+        </div>
+        <div>
+          <Controller
+            name="description"
+            control={control}
+            render={({ field }) => (
+              <SimpleMDE placeholder="Description" {...field} />
+            )}
+          />
+          <ErrorMessage>{errors.description?.message}</ErrorMessage>
+        </div>
+        {issue && (
+          <div className="mb-3">
+            <Controller
+              name="status"
+              control={control}
+              render={({ field }) => (
+                <Select.Root value={field.value} onValueChange={field.onChange}>
+                  <Select.Trigger placeholder="Select status" />
+                  <Select.Content>
+                    <Select.Group>
+                      <Select.Item value="OPEN">Open</Select.Item>
+                      <Select.Item value="IN_PROGRESS">In Progress</Select.Item>
+                      <Select.Item value="CLOSED">Closed</Select.Item>
+                    </Select.Group>
+                  </Select.Content>
+                </Select.Root>
+              )}
+            />
+            <ErrorMessage>{errors.status?.message}</ErrorMessage>
+          </div>
+        )}
         <Button disabled={isSubmitting}>
           {issue ? "Update Issue" : "Create Issue"}{" "}
           {isSubmitting && <Spinner />}
