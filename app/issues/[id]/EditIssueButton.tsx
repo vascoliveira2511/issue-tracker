@@ -5,10 +5,14 @@ import React from "react";
 
 const EditIssueButton = ({ issueId }: { issueId: number }) => {
   return (
-    <Button>
-      <Pencil2Icon />
-      <Link href={`/issues/${issueId}/edit`}>Edit Issue</Link>
-    </Button>
+    <Link href={`/issues/${issueId}/edit`} passHref legacyBehavior>
+      <Button asChild style={{ display: "inline-flex", alignItems: "center" }}>
+        <a>
+          <Pencil2Icon />
+          Edit Issue
+        </a>
+      </Button>
+    </Link>
   );
 };
 
