@@ -1,19 +1,34 @@
 "use client";
 
-import { AlertDialog, Button, Flex } from "@radix-ui/themes";
+import { AlertDialog, Button, Flex, Spinner } from "@radix-ui/themes";
 import axios from "axios";
 import { useRouter } from "next/navigation";
-import { Fragment } from "react";
+import { Fragment, useState } from "react";
 
 const EditIssueButton = ({ issueId }: { issueId: number }) => {
   const router = useRouter();
+  const [error, setError] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const onDelete = async () => {
+    try {
+      setIsDeleting(true);
+      await axios.delete(`/api/issues/${issueId}`);
+      router.push("/issues");
+      router.refresh();
+    } catch (error) {
+      setIsDeleting(false);
+      setError(true);
+    }
+  };
 
   return (
     <Fragment>
       <AlertDialog.Root>
         <AlertDialog.Trigger>
-          <Button color="red" style={{ cursor: "pointer" }}>
+          <Button color="red" disabled={isDeleting}>
             Delete Issue
+            {isDeleting && <Spinner />}
           </Button>
         </AlertDialog.Trigger>
         <AlertDialog.Content>
@@ -24,7 +39,7 @@ const EditIssueButton = ({ issueId }: { issueId: number }) => {
           </AlertDialog.Description>
           <Flex mt="4" gap="3">
             <AlertDialog.Cancel>
-              <Button variant="soft" color="gray" style={{ cursor: "pointer" }}>
+              <Button variant="soft" color="gray">
                 Cancel
               </Button>
             </AlertDialog.Cancel>
@@ -32,16 +47,29 @@ const EditIssueButton = ({ issueId }: { issueId: number }) => {
               <Button
                 color="red"
                 style={{ cursor: "pointer" }}
-                onClick={async () => {
-                  await axios.delete(`/api/issues/${issueId}`);
-                  router.push("/issues");
-                  router.refresh();
-                }}
+                onClick={onDelete}
               >
                 Delete Issue
               </Button>
             </AlertDialog.Action>
           </Flex>
+        </AlertDialog.Content>
+      </AlertDialog.Root>
+
+      <AlertDialog.Root open={error}>
+        <AlertDialog.Content>
+          <AlertDialog.Title>Error</AlertDialog.Title>
+          <AlertDialog.Description>
+            The issue could not be deleted. Please try again.
+          </AlertDialog.Description>
+          <Button
+            variant="soft"
+            color="gray"
+            mt="2"
+            onClick={() => setError(false)}
+          >
+            OK
+          </Button>
         </AlertDialog.Content>
       </AlertDialog.Root>
     </Fragment>
