@@ -15,3 +15,15 @@
 body {
   color: rgb(var(--foreground-rgb));
 }
+
+@layer utilities {
+  .nav-link {
+    color: theme("colors.zinc.500");
+    &:hover {
+      color: theme("colors.zinc.800");
+    }
+    transition-property: color;
+    transition-duration: 150ms;
+    transition-timing-function: ease-in-out;
+  }
+}
