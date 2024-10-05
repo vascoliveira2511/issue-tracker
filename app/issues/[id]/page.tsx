@@ -5,6 +5,7 @@ import DeleteIssueButton from "./DeleteIssueButton";
 import EditIssueButton from "./EditIssueButton";
 import IssueDetails from "./IssueDetails";
 import { auth } from "@/auth";
+import AssigneeSelect from "./AssigneeSelect";
 
 interface Props {
   params: { id: string };
@@ -30,12 +31,15 @@ const IssueDetailPage = async ({ params }: Props) => {
       <Box className="md:col-span-4">
         <IssueDetails issue={issue} />
       </Box>
-      <Box>
-        <Flex direction={"column"} gap={"4"}>
-          {session && <EditIssueButton issueId={issue.id} />}
-          {session && <DeleteIssueButton issueId={issue.id} />}
-        </Flex>
-      </Box>
+      {session && (
+        <Box>
+          <Flex direction={"column"} gap={"4"}>
+            <AssigneeSelect issueId={issue.id} />
+            <EditIssueButton issueId={issue.id} />
+            <DeleteIssueButton issueId={issue.id} />
+          </Flex>
+        </Box>
+      )}
     </Grid>
   );
 };
