@@ -1,9 +1,8 @@
-import { issueSchema } from "@/app/validationSchemas";
+import { patchIssueSchema } from "@/app/validationSchemas";
 import prisma from "@/prisma/client";
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 
-// PATCH function - updates an issue by ID
 export const PATCH = auth(async function PATCH(req, context: any) {
   if (!req.auth) {
     return NextResponse.json({ message: "Not authenticated" }, { status: 401 });
@@ -16,9 +15,21 @@ export const PATCH = auth(async function PATCH(req, context: any) {
 
   try {
     const body = await req.json();
-    const validation = issueSchema.safeParse(body);
+    const validation = patchIssueSchema.safeParse(body);
     if (!validation.success) {
       return NextResponse.json(validation.error.format(), { status: 400 });
+    }
+
+    const { assignedToUserId, title, description, status } = body;
+
+    if (assignedToUserId) {
+      const user = await prisma.user.findUnique({
+        where: { id: assignedToUserId },
+      });
+
+      if (!user) {
+        return NextResponse.json({ error: "Invalid user" }, { status: 400 });
+      }
     }
 
     const issue = await prisma.issue.findUnique({
@@ -32,9 +43,10 @@ export const PATCH = auth(async function PATCH(req, context: any) {
     const updatedIssue = await prisma.issue.update({
       where: { id: parseInt(params.id) },
       data: {
-        title: body.title,
-        description: body.description,
-        status: body.status,
+        title,
+        description,
+        status,
+        assignedToUserId,
       },
     });
 
@@ -47,7 +59,6 @@ export const PATCH = auth(async function PATCH(req, context: any) {
   }
 });
 
-// DELETE function - deletes an issue by ID
 export const DELETE = auth(async function DELETE(req, context: any) {
   if (!req.auth) {
     return NextResponse.json({ message: "Not authenticated" }, { status: 401 });

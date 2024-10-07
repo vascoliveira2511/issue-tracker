@@ -1,6 +1,5 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import prisma from "@/prisma/client";
-import { issueSchema } from "@/app/validationSchemas";
 import { auth } from "@/auth";
 
 export const GET = auth(async function GET(req) {
