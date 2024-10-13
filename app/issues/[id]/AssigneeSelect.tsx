@@ -20,6 +20,9 @@ const AssigneeSelect = ({ issue }: { issue: Issue }) => {
       .patch("/api/issues/" + issue.id, {
         assignedToUserId: userId === "unassigned" ? null : userId,
       })
+      .then(() => {
+        toast.success("Issue updated successfully");
+      })
       .catch((error) => {
         toast.error("Failed to update issue");
       });
