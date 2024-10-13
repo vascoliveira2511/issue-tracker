@@ -6,27 +6,30 @@ import { Flex, Grid } from "@radix-ui/themes";
 import { Metadata } from "next";
 
 export default async function Home() {
-  const issueCounts = await Promise.all([
-    prisma.issue.count({ where: { status: "OPEN" } }),
-    prisma.issue.count({ where: { status: "CLOSED" } }),
-    prisma.issue.count({ where: { status: "IN_PROGRESS" } }),
-  ]);
-
-  const [open, closed, inProgress] = issueCounts;
+  const open = await prisma.issue.count({
+    where: { status: "OPEN" },
+  });
+  const inProgress = await prisma.issue.count({
+    where: { status: "IN_PROGRESS" },
+  });
+  const closed = await prisma.issue.count({
+    where: { status: "CLOSED" },
+  });
 
   return (
     <Grid columns={{ initial: "1", md: "2" }} gap="5">
       <Flex direction="column" gap="5">
-        <IssueSummary open={open} closed={closed} in_progress={inProgress} />
-        <IssueChart open={open} closed={closed} in_progress={inProgress} />
+        <IssueSummary open={open} in_progress={inProgress} closed={closed} />
+        <IssueChart open={open} in_progress={inProgress} closed={closed} />
       </Flex>
       <LatestIssues />
     </Grid>
   );
 }
 
+export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
   title: "Issue Tracker - Dashboard",
-  description: "View the latest issues and statistics for the issue tracker",
-  keywords: ["issue tracker", "dashboard", "statistics"],
+  description: "View a summary of project issues",
+  keywords: ["issue tracker", "dashboard"],
 };
